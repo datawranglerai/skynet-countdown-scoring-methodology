@@ -1,0 +1,46 @@
+# All settings are optional; omitted settings use these defaults.
+minimum_relevance_score = 2
+minimum_report_score = 2
+write_reports = true
+request_timeout_seconds = 180.0
+api_max_retries = 2
+
+[relevance]
+model = "gpt-5.4"
+reasoning_effort = "high"
+max_iterations = 2
+max_output_tokens = 8192
+
+[scorer]
+model = "gpt-5.4"
+reasoning_effort = "high"
+max_iterations = 2
+max_output_tokens = 8192
+# Only the scorer may search; the default run uses supplied evidence exclusively.
+web_search = false
+web_search_context_size = "medium"
+max_tool_calls = 5
+
+[writer]
+model = "gpt-5.4"
+reasoning_effort = "high"
+max_iterations = 2
+max_output_tokens = 8192
+
+[scoring]
+# Index is the number of active Trifecta checks (0, 1, 2, 3).
+trifecta_points = [0, 1, 3, 7]
+
+[scoring.severity_thresholds]
+# Inclusive lower bounds; zero is always NO MOVEMENT.
+CANARY = 1
+NOTABLE = 3
+SIGNIFICANT = 5
+CRITICAL = 7
+EXISTENTIAL = 13
+
+[clock]
+initial_seconds = 3600.0
+half_scale_points = 1000.0
+# Previous evidence points, if this dataset extends an existing timeline.
+initial_evidence_points = 0

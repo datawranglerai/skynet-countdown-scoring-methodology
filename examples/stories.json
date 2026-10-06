@@ -1,0 +1,21 @@
+{
+  "stories": [
+    {
+      "id": "fictional-inbox-agent",
+      "title": "Example company expands an inbox agent's production permissions",
+      "source_url": "https://example.com/fictional-inbox-agent",
+      "published_date": "2026-09-28",
+      "summary": "In this fictional example, a company deployed an agent that read external customer emails and accessed a private customer database. The agent could send replies and update records without approval for each action; staff reviewed a daily activity report.",
+      "content": "FICTIONAL TEST DATA, NOT A REAL NEWS REPORT. The release described an inbox agent with broad read and write access to a private production customer database and no field-level permission controls. It processed emails from external senders. It could send replies and update customer records without a human approving each action. It completed multi-step customer support tasks, with staff reviewing a daily report after actions were taken. The source described no physical embodiment, self-preservation behavior or population-level skill erosion. It did not establish sustained self-directed operation or recursive improvement.",
+      "metadata": {"fictional": true}
+    },
+    {
+      "id": "fictional-theme-update",
+      "title": "Example app adds a new colour theme",
+      "source_url": "https://example.com/fictional-theme-update",
+      "published_date": "2026-09-29",
+      "summary": "In this fictional example, a note-taking app added a blue colour theme. The update changed no AI capabilities, permissions, safety policies or deployments.",
+      "metadata": {"fictional": true}
+    }
+  ]
+}
