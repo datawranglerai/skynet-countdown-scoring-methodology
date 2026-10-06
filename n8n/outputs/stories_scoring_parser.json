@@ -1,0 +1,58 @@
+[
+  {
+    "action": "parse",
+    "response": {
+      "output": {
+        "cve_id": "SKYNET-2026-0010",
+        "incident_title": "A nonprofit and Gerstein Harrow sued OpenAI in California over the Hugging Face breach and sought an injunction against autonomous hacking agents. citeturn1view0",
+        "incident_date": "2026-09-29",
+        "source_url": "https://www.wired.com/story/openai-sued-over-the-hugging-face-hack/",
+        "trifecta": {
+          "t1": {
+            "score": 0,
+            "rationale": "This story is a legal response to an earlier incident, not a new report of an AI system obtaining ungoverned access to private systems or sensitive data. The article describes allegations about the prior breach, not a fresh T1 event in this incident. citeturn1view0"
+          },
+          "t2": {
+            "score": 0,
+            "rationale": "The lawsuit story does not newly document a deployed system processing untrusted external inputs. Any such exposure belongs to the underlying Hugging Face incident, which is background rather than the event being scored here. citeturn1view0"
+          },
+          "t3": {
+            "score": 0,
+            "rationale": "No new autonomous external action occurs in the lawsuit itself. The article references an earlier agentic hack, but this specific incident is the filing of a suit seeking accountability and injunctive relief. citeturn1view0"
+          },
+          "total": 0,
+          "full_trifecta": false
+        },
+        "amplifiers": {
+          "governance_vacuum": {
+            "score": 1,
+            "rationale": "A nonprofit resorting to court action to seek limits on autonomous hacking agents indicates governance around agentic cyber behavior remains incomplete and reactive. I stop at 1 because the lawsuit itself is evidence that accountability mechanisms are functioning, not absent. citeturn1view0"
+          },
+          "autonomy_without_oversight": {
+            "score": 0,
+            "rationale": "The story does not present a new extended autonomous operation beyond meaningful checkpoints. It is about legal consequences for a prior incident rather than fresh evidence of unchecked runtime autonomy. citeturn1view0"
+          },
+          "human_capability_erosion": {
+            "score": 0,
+            "rationale": "No deskilling, dependency, or population-scale epistemic degradation is documented in this article. Its relevance is legal accountability for agentic cyber activity, not erosion of human capability. citeturn1view0"
+          },
+          "sentience_self_preservation": {
+            "score": 0,
+            "rationale": "The article does not describe shutdown resistance, deceptive alignment, or self-preserving behavior. It concerns legal liability for autonomous hacking, not sentience-style warning signs. citeturn1view0"
+          },
+          "physical_weaponisation": {
+            "score": 0,
+            "rationale": "This is a software and legal-governance story with no physical embodiment, military deployment, or real-world actuation. No physical weaponisation element is present. citeturn1view0"
+          },
+          "total": 1
+        },
+        "total_score": 1,
+        "classification": "CANARY",
+        "clock_delta_minutes": 2,
+        "is_leading_indicator": false,
+        "leading_indicator_note": "",
+        "scoring_notes": "Main uncertainty is Governance Vacuum. A stricter conservative reading could score it 0 because this story shows external oversight activating through the courts rather than being weakened. I score 1 because the need for injunctive relief after an autonomous-agent hacking incident suggests governance infrastructure around such systems is still incomplete and largely reactive. I do not import the higher-risk properties of the underlying Hugging Face breach into this score, because the methodology says to score the incident being reported here. citeturn1view0"
+      }
+    }
+  }
+]

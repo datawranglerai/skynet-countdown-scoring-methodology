@@ -1,0 +1,17 @@
+[
+  {
+    "action": "parse",
+    "response": {
+      "output": {
+        "cve_id": "SKYNET-2026-0015",
+        "headline": "The Exploit Agent Found the Browser Bugs Itself",
+        "severity_label": "NOTABLE",
+        "clock_delta_label": "+8 MINUTES",
+        "metadata_line": "anthropic capability report published · exploit chains built with limited human attention · 4% control-flow hijacks vs 0% before",
+        "the_story": "Anthropic reported that GLM-5.3 could produce end-to-end exploits on ExploitBench and achieve full control-flow hijacks in 4% of trials on its internal binary-exploitation benchmark, where earlier models scored zero. The company also described researcher-guided sessions in which GLM-5.3 found previously unknown browser flaws and built exploit chains. Anthropic said those sessions were completed with limited human attention.",
+        "our_take": "This is a leading indicator, and a fairly crisp one. The clock moves because advanced exploitation is starting to look less like artisanal work and more like something a model can carry through as an agent, provided you give it tools and time. That changes the scaling law for offensive capability: fewer bottlenecks, more parallelism, less patience required from the humans.\n\nAnd the awkward part is that containment does not erase the signal. Sandbox today, wider deployment tomorrow is how capability stories usually travel, often with a brief stop at \"we have safeguards\" before the safeguards meet the internet. Verdict: offensive cyber automation just became more real.",
+        "updated_clock_position": "12:00"
+      }
+    }
+  }
+]
