@@ -1,0 +1,13 @@
+.env
+.venv
+venv
+.codex
+.claude
+.omc
+.omx
+__pycache__/**
+**/__pycache__/**
+.idea
+.ruff_cache/
+.mypy_cache/
+results.json
