@@ -7,7 +7,7 @@ from typing import Annotated, Literal, Self
 
 from pydantic import Field, model_validator
 
-from .models import NonnegativeInt, StrictModel, Text
+from .models import EvidencePoints, NonnegativeInt, StrictModel, Text
 
 PositiveInt = Annotated[int, Field(gt=0)]
 PositiveFloat = Annotated[float, Field(gt=0, allow_inf_nan=False)]
@@ -58,9 +58,9 @@ class ScoringConfig(StrictModel):
 
 
 class ClockConfig(StrictModel):
-    initial_seconds: PositiveFloat = 3600.0
+    initial_seconds: PositiveFloat = 900.0
     half_scale_points: PositiveFloat = 1000.0
-    initial_evidence_points: NonnegativeInt = 0
+    initial_evidence_points: EvidencePoints = 0
 
 
 class Config(StrictModel):

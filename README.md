@@ -4,7 +4,7 @@ An open-source Python companion to [Skynet Countdown](https://skynetcountdown.or
 
 This project starts after collection and scraping. It does not discover stories, scrape Reddit or articles, reconcile duplicate events, manage assessment history, allocate CVE identifiers, or publish to SQL, Sheets or Slack. It writes one local JSON result. The index is editorial: its clock is symbolic, not a forecast or a probability of catastrophe.
 
-The [site methodology](references/SKYNET_COUNTDOWN_SITE_README.md) is the scoring authority. The [original n8n workflow](n8n/Skynet%20Countdown%20v1.2.json) provides the relevance, criterion-assessment and editorial stages; its calculated totals and clock values are not used.
+[METHODOLOGY.md](METHODOLOGY.md) is the scoring authority: methodology v1.0, with calibration effective **7 October 2026**. The [original n8n workflow](n8n/Skynet%20Countdown%20v1.2.json) provides the relevance, criterion-assessment and editorial stages. Python derives the published totals and clock values from the component ratings; retained n8n clock recommendations never set the clock.
 
 ## Quick start
 
@@ -47,9 +47,11 @@ The input is a UTF-8 JSON object containing a `stories` array:
 }
 ```
 
-`id`, `title`, `source_url`, `published_date` and `summary` are required. Dates use `YYYY-MM-DD`; URLs must be HTTP(S). `content`, `reddit_post_url` and `subreddit` are optional and may be omitted or null. Put any additional JSON data under the optional `metadata` object. Unknown top-level or story fields are rejected, as are invalid types, blank required strings and duplicate IDs.
+`id`, `title`, `source_url`, `published_date` and `summary` are required. Use the event's canonical stable slug as `id`; it is also the tie-break key for events recorded on the same date. Dates use `YYYY-MM-DD`; URLs must be HTTP(S). `content`, `reddit_post_url` and `subreddit` are optional and may be omitted or null. Put any additional JSON data under the optional `metadata` object. Unknown top-level or story fields are rejected, as are invalid types, blank required strings and duplicate IDs.
 
-Supply stable IDs and each event only once. Different articles about the same event are not automatically recognised as duplicates, even with distinct IDs. A source URL is attribution, not fetched content: provide enough evidence in `summary`, `content` and `metadata` for the assessment. Without article content, the model works from the remaining supplied evidence and records its limitations.
+Supply one selected source per explicitly grouped event. The caller owns event grouping, canonical source selection and assessment history; do not pass revisions or repeated coverage as separate events. Different articles about the same event are not automatically recognised as duplicates, even with distinct IDs. A source URL is attribution, not fetched content: provide the original source evidence in `summary`, `content` and `metadata`, rather than treating Reddit titles or comments as the basis for ratings. Without article content, the model works from the remaining supplied evidence and records its limitations.
+
+This companion generates fresh assessments and reports. It does not ingest legacy n8n assessment exports or enforce their database schema. In particular, its `calculation.total_score` is the published weighted score; it must not be copied into n8n's retained unweighted `total_score` column. The distinct `calculation.raw_source_total` exposes that 0–13 sum for the editorial gate and integrations. A legacy exporter must also derive and validate the raw classification and other required source fields described in methodology section 11.
 
 ## Evaluation stages
 
@@ -60,7 +62,7 @@ Supply stable IDs and each event only once. Different articles about the same ev
 
 The relevance and writer stages are structured LLM chains without tools. The scorer is also a chain by default; optional hosted web search can check the supplied story. There is no agent framework or custom tool loop. All model outputs use strict JSON schemas and are validated with Pydantic.
 
-Stories are processed oldest first; equal dates retain input order. The default relevance threshold is **2**, matching the n8n filter actually executed; its unused configuration value of 5 is not adopted. The default report threshold is **2 weighted points**. Every successfully assessed story contributes its points even when below that reporting threshold or when report writing is disabled. Zero-score assessments remain in the output and do not move the clock.
+Stories are processed by recorded date, then canonical event ID. No publication-date cutoff or automatic rebasing applies. The default relevance threshold is **2**, matching the n8n filter actually executed; its unused configuration value of 5 is not adopted. The rubric marks scores 1–2 as irrelevant, and contradictory positive flags trigger a correction attempt. The default report threshold is **2 raw source points**, matching the saved writer branch. Every successfully assessed story contributes its published points even when below that reporting threshold or when report writing is disabled. Zero-score assessments remain in the output and do not move the clock.
 
 ## Deterministic scoring
 
@@ -73,7 +75,7 @@ Each Trifecta check is 0 or 1: ungoverned system access (T1), untrusted input ex
 | 2 | 3 |
 | 3 | 7 |
 
-Add the five amplifier ratings: governance vacuum, autonomy without oversight, human capability erosion, sentience/self-preservation, and physical embodiment/weaponisation. Each contributes 0, 1 or 2. The default maximum is **17**. T3 alone does not earn autonomy amplifier points; that amplifier needs separate evidence about the extent, duration or scale of operation beyond meaningful review.
+Add the five amplifier ratings: governance vacuum, autonomy without oversight, human capability erosion, emergent agency signals, and physical weaponisation. Each contributes 0, 1 or 2. The legacy `sentience_self_preservation` key remains for compatibility; behavioural agency signals do not establish consciousness. Controlled civilian embodiment can earn one physical point. The default maximum is **17**. T3 alone does not earn autonomy amplifier points; that amplifier needs separate evidence about the extent, duration or scale of operation beyond meaningful review.
 
 | Score | Severity |
 | --- | --- |
@@ -90,11 +92,18 @@ With cumulative evidence points `B`, incident score `s`, initial seconds `T` and
 remaining_seconds(B) = T × 2^(-B / H)
 incident_delta_seconds = remaining_seconds(B) - remaining_seconds(B + s)
 gap_closed_percent = 100 × (1 - 2^(-s / H))
+evidence_pressure_percent = 100 × (1 - 2^(-B / H))
 ```
 
-Defaults are `T = 3600` and `H = 1000`: every 1,000 points halve the remaining time. `clock.initial_evidence_points` starts a run from an existing cumulative total. Supplying that total does not provide history or prevent recounting earlier events. Scores never subtract evidence. The reference's separate “evidence pressure” display has no supplied formula and is not implemented.
+Defaults are **`T = 900` seconds (15:00)** and **`H = 1000`**: every 1,000 points halve the remaining time. The initial display reference is borrowed once from IMD's September 2026 AI Safety Clock reading, as explained in methodology section 7; it does not add points or create a date cutoff. Movement is calculated as `remaining_seconds(B) × gap_closed_percent / 100` using `expm1`, preserving tiny changes instead of subtracting nearly equal numbers. Evidence pressure measures the share of the initial symbolic window consumed, not the percentage of human control lost.
 
-The arithmetic is deterministic for the same validated ratings, configuration and event order. Model judgements and editorial text can vary between runs. The pure functions in [`scoring.py`](skynet_countdown/scoring.py) can be used independently of the API; [`pipeline.py`](skynet_countdown/pipeline.py) exposes `evaluate(dataset, config, client=...)` for integrations.
+`clock.initial_evidence_points` starts a run from an existing cumulative total. Supplying that total does not provide history or prevent recounting earlier events. For corrections, rerun the complete caller-selected ledger from zero; a corrected score or grouping can move the recalculated clock in either direction. Scores never subtract evidence, grant recovery credit or decay over time.
+
+Calculations retain unrounded values and reject evidence totals beyond `2**53 - 1` for compatibility with the official dataset engine. Floating-point underflow retains the smallest positive time and positive-event movement; a zero score remains exactly zero. `format_remaining_time` rounds to the nearest second and displays values below one second as `<00:01`. `format_movement_seconds` distinguishes `NO MOVEMENT` from `<1 SECOND CLOSER`. `format_evidence_pressure` uses one decimal and displays values at or above 99.95 as `<100`.
+
+The official 113-point example displays **13:52**. With 191 prior points, a full Trifecta plus autonomy = 2 scores **9 / CRITICAL**, closes **0.62%** of the remaining gap, moves **4.903 seconds**, and results in **13:03**. These examples are covered by offline regression tests.
+
+The arithmetic is deterministic for the same validated ratings, configuration and event order. Model judgements and editorial text can vary between runs. The pure functions in [`scoring.py`](skynet_countdown/scoring.py), including `calculate_score`, `remaining_seconds`, `gap_closed_percent` and `evidence_pressure_percent`, can be used independently of the API; [`pipeline.py`](skynet_countdown/pipeline.py) exposes `evaluate(dataset, config, client=...)` for integrations. Criterion contracts live in [`models.py`](skynet_countdown/models.py), rubric instructions in [`prompts/`](skynet_countdown/prompts/), and published defaults in [`config.py`](skynet_countdown/config.py) and [`config.toml`](config.toml).
 
 ## Configuration
 
@@ -106,7 +115,7 @@ The arithmetic is deterministic for the same validated ratings, configuration an
 | `scorer.web_search` | Enable hosted search for this story; disabled by default |
 | `scorer.web_search_context_size` | `low`, `medium` or `high` search context |
 | `scorer.max_tool_calls` | Hosted tool-call limit per scorer request |
-| `minimum_relevance_score`, `minimum_report_score`, `write_reports` | Filtering and report generation |
+| `minimum_relevance_score`, `minimum_report_score`, `write_reports` | Relevance filtering and editorial generation; report threshold uses the raw source total |
 | `request_timeout_seconds`, `api_max_retries` | SDK transport timeout and retries |
 | `scoring.trifecta_points`, `scoring.severity_thresholds` | Weighted Trifecta table and inclusive severity boundaries |
 | `clock.initial_seconds`, `clock.half_scale_points`, `clock.initial_evidence_points` | Clock calibration and starting evidence total |
@@ -117,7 +126,11 @@ Choose a model that supports the Responses API and structured outputs, plus web 
 
 ## Inspect the result
 
-The JSON retains each input story alongside `relevance`, `assessment`, `calculation`, `report`, `status`, `error` and per-stage `runs`. Stages not reached are null. Run records include response IDs, returned model names, status, token usage, citations and web-search calls when available. The file also records the resolved configuration, prompt SHA-256 hashes, schema version, generation time, cumulative points and remaining seconds.
+The JSON retains each input story alongside `relevance`, `assessment`, `calculation`, `report`, `status`, `error` and per-stage `runs`. Stages not reached are null. Run records include response IDs, returned model names, status, token usage, citations and web-search calls when available. The file also records the resolved configuration, prompt SHA-256 hashes, schema version, methodology version, calibration reference date, generation time, cumulative points, remaining seconds and evidence pressure.
+
+`methodology_profile` is `published` when the scoring table, severity thresholds, starting window, sensitivity and relevance/report thresholds match the official defaults; otherwise it is `custom`. Model settings, disabling reports and supplying prior evidence do not change this profile. `calibration_effective_date` identifies the official reference calibration; the resolved configuration records any custom constants actually used.
+
+Result schema **2.0** uses internal severity `NO_MOVEMENT`, displayed as “NO MOVEMENT”; adds `raw_source_total`, evidence pressure and methodology metadata; and applies the raw editorial gate and canonical-ID ordering. Integrations consuming schema 1.0 should account for those changes. Report prose still separates factual story and interpretation; metadata must be one lowercase line containing exactly three nonblank fragments separated by ` · `.
 
 Excluded stories stay visible. A stage failure is recorded against its story, later stories still run, and the file has `complete: false`; the CLI exits with a nonzero status. No replacement ratings are invented. If writing fails after a successful calculation, that assessment and its points remain in the result. Review failed records before treating a run as complete.
 

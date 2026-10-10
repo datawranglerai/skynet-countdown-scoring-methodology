@@ -7,7 +7,9 @@ from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 
 Text = Annotated[str, Field(min_length=1)]
 NonnegativeInt = Annotated[int, Field(ge=0)]
-Severity = Literal["NO MOVEMENT", "CANARY", "NOTABLE", "SIGNIFICANT", "CRITICAL", "EXISTENTIAL"]
+MAX_SAFE_EVIDENCE_POINTS = 2**53 - 1
+EvidencePoints = Annotated[int, Field(ge=0, le=MAX_SAFE_EVIDENCE_POINTS)]
+Severity = Literal["NO_MOVEMENT", "CANARY", "NOTABLE", "SIGNIFICANT", "CRITICAL", "EXISTENTIAL"]
 
 
 class StrictModel(BaseModel):
@@ -51,6 +53,12 @@ class Relevance(StrictModel):
         "quantum",
         "none",
     ]
+
+    @model_validator(mode="after")
+    def low_scores_are_irrelevant(self) -> Self:
+        if self.relevant_to_skynet and self.relevance_score <= 2:
+            raise ValueError("Relevance scores 1–2 must be marked irrelevant under the rubric.")
+        return self
 
 
 class BinaryCriterion(StrictModel):
@@ -107,10 +115,23 @@ class Editorial(StrictModel):
             raise ValueError("The headline must contain at most 12 words.")
         return self
 
+    @model_validator(mode="after")
+    def metadata_fragments(self) -> Self:
+        fragments = self.metadata_line.split(" · ")
+        if (
+            len(fragments) != 3
+            or any(not fragment.strip() for fragment in fragments)
+            or self.metadata_line != self.metadata_line.lower()
+            or "\n" in self.metadata_line
+            or "\r" in self.metadata_line
+        ):
+            raise ValueError("Metadata must be one lowercase line with three ' · ' fragments.")
+        return self
+
 
 class ClockMovement(StrictModel):
-    cumulative_points_before: NonnegativeInt
-    cumulative_points_after: NonnegativeInt
+    cumulative_points_before: EvidencePoints
+    cumulative_points_after: EvidencePoints
     remaining_seconds_before: Annotated[float, Field(gt=0, allow_inf_nan=False)]
     remaining_seconds_after: Annotated[float, Field(gt=0, allow_inf_nan=False)]
     delta_seconds: Annotated[float, Field(ge=0, allow_inf_nan=False)]
@@ -122,6 +143,7 @@ class CalculatedScore(StrictModel):
     full_trifecta: bool
     trifecta_points: NonnegativeInt
     amplifier_points: NonnegativeInt
+    raw_source_total: NonnegativeInt
     total_score: NonnegativeInt
     max_score: Annotated[int, Field(gt=0)]
     classification: Severity
@@ -156,11 +178,15 @@ class StoryResult(StrictModel):
 
 
 class EvaluationResult(StrictModel):
-    schema_version: str = "1.0"
+    schema_version: str = "2.0"
+    methodology_version: str = "1.0"
+    calibration_effective_date: date = date(2026, 10, 7)
+    methodology_profile: Literal["published", "custom"]
     generated_at: datetime
     config: dict[str, Any]
     prompt_sha256: dict[str, str]
-    cumulative_points: NonnegativeInt
+    cumulative_points: EvidencePoints
     remaining_seconds: Annotated[float, Field(gt=0, allow_inf_nan=False)]
+    evidence_pressure_percent: Annotated[float, Field(ge=0, le=100, allow_inf_nan=False)]
     complete: bool
     stories: list[StoryResult]
