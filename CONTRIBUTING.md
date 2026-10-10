@@ -26,7 +26,7 @@ Validation and tests do not require credentials or make paid API calls. Keep aut
 
 ## Methodology changes
 
-The [site reference](references/SKYNET_COUNTDOWN_SITE_README.md) governs the default 17-point calculation. Preserve the boundary between evidence judgements and Python arithmetic: the scorer must not assign totals, severity or clock movement. T3 and the autonomy amplifier require separate evidence. Relevant stories may legitimately score zero.
+[METHODOLOGY.md](METHODOLOGY.md) governs the default 17-point calculation and 900-second starting window. Preserve the boundary between evidence judgements and Python arithmetic: the scorer must not assign totals, severity or clock movement. T3 and the autonomy amplifier require separate evidence. Relevant stories may legitimately score zero. Keep the raw source total separate from the published score, and make changes to the official defaults explicit in method metadata and documentation.
 
 For rubric or prompt changes, include the previous behaviour, the proposed behaviour and a concrete evidence example. For calculation or pipeline changes, add focused regression coverage, including relevant boundary and failure cases. Update the documentation and configuration example when their contract changes. Reuse existing patterns and avoid introducing an abstraction for a single caller without a clear need.
 

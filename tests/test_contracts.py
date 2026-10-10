@@ -104,6 +104,18 @@ class ModelContractTests(unittest.TestCase):
         assessment.update(is_leading_indicator=True, leading_indicator_note="An early signal")
         self.assertTrue(Assessment.model_validate_json(json.dumps(assessment)).is_leading_indicator)
 
+    def test_scoring_notes_are_required_but_may_record_no_uncertainties(self):
+        assessment = make_assessment().model_dump()
+        assessment["scoring_notes"] = ""
+        self.assertEqual(Assessment.model_validate(assessment).scoring_notes, "")
+        assessment["scoring_notes"] = None
+        with self.assertRaises(ValidationError):
+            Assessment.model_validate_json(json.dumps(assessment))
+        assessment = make_assessment().model_dump()
+        del assessment["scoring_notes"]
+        with self.assertRaises(ValidationError):
+            Assessment.model_validate_json(json.dumps(assessment))
+
     def test_relevance_is_a_strict_bounded_judgment(self):
         for invalid in (True, 1.0, "8", 0, 11):
             with self.subTest(score=invalid), self.assertRaises(ValidationError):
@@ -116,6 +128,12 @@ class ModelContractTests(unittest.TestCase):
             with self.subTest(update=update), self.assertRaises(ValidationError):
                 Relevance.model_validate_json(json.dumps({**relevance(), **update}))
 
+    def test_relevance_scores_one_and_two_cannot_claim_relevance(self):
+        for score in (1, 2):
+            with self.subTest(score=score), self.assertRaises(ValidationError):
+                Relevance.model_validate(relevance(True, score))
+            self.assertFalse(Relevance.model_validate(relevance(False, score)).relevant_to_skynet)
+
     def test_writer_keeps_prose_fields_and_limits_headline_length(self):
         result = Editorial.model_validate_json(json.dumps(editorial()))
         self.assertEqual(result.the_story, editorial()["the_story"])
@@ -126,6 +144,11 @@ class ModelContractTests(unittest.TestCase):
             {"our_take": ""},
             {"severity_label": "CRITICAL"},
             {"clock_delta_label": "42 seconds"},
+            {"metadata_line": "Agent launched · public release · daily review"},
+            {"metadata_line": "agent launched · daily review"},
+            {"metadata_line": "agent launched ·  · daily review"},
+            {"metadata_line": "agent launched · daily review · public release · fourth item"},
+            {"metadata_line": "agent launched · daily review · public\nrelease"},
         ):
             with self.subTest(update=update), self.assertRaises(ValidationError):
                 Editorial.model_validate_json(json.dumps({**editorial(), **update}))
@@ -176,6 +199,12 @@ class ModelContractTests(unittest.TestCase):
 
 
 class ConfigContractTests(unittest.TestCase):
+    def test_checked_in_config_matches_official_defaults(self):
+        config = load_config(Path(__file__).resolve().parents[1] / "config.toml")
+        self.assertEqual(config, Config())
+        self.assertEqual(config.clock.initial_seconds, 900)
+        self.assertEqual(config.clock.half_scale_points, 1000)
+
     def test_toml_loads_custom_chain_scoring_and_clock_settings(self):
         content = """
 minimum_relevance_score = 4
@@ -297,6 +326,7 @@ initial_evidence_points = 113
             {"api_max_retries": -1},
             {"api_max_retries": True},
             {"clock": {"initial_evidence_points": -1}},
+            {"clock": {"initial_evidence_points": 2**53}},
             {"relevance": {"model": " "}},
             {"writer": {"reasoning_effort": "ultra"}},
             {"scorer": {"web_search": "false"}},

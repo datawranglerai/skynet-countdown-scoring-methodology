@@ -1,5 +1,6 @@
 # All settings are optional; omitted settings use these defaults.
 minimum_relevance_score = 2
+# Editorial gate uses the unweighted 0–13 source total; it never filters assessments.
 minimum_report_score = 2
 write_reports = true
 request_timeout_seconds = 180.0
@@ -32,7 +33,7 @@ max_output_tokens = 8192
 trifecta_points = [0, 1, 3, 7]
 
 [scoring.severity_thresholds]
-# Inclusive lower bounds; zero is always NO MOVEMENT.
+# Inclusive lower bounds; zero is always NO_MOVEMENT internally.
 CANARY = 1
 NOTABLE = 3
 SIGNIFICANT = 5
@@ -40,7 +41,8 @@ CRITICAL = 7
 EXISTENTIAL = 13
 
 [clock]
-initial_seconds = 3600.0
+# Methodology v1.0, calibration effective 7 October 2026: 15 symbolic minutes.
+initial_seconds = 900.0
 half_scale_points = 1000.0
 # Previous evidence points, if this dataset extends an existing timeline.
 initial_evidence_points = 0
