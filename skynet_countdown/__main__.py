@@ -44,11 +44,11 @@ def main(argv: list[str] | None = None) -> int:
                     max_retries=config.api_max_retries,
                 ) as client:
                     result = evaluate(dataset, config, client=client)
+                output.write(result.model_dump_json(indent=2) + "\n")
             except BaseException:
                 output.close()
-                args.output.unlink(missing_ok=True)  # Only the empty file created above.
+                args.output.unlink(missing_ok=True)  # Only the file reserved above.
                 raise
-            output.write(result.model_dump_json(indent=2) + "\n")
         assessed = sum(story.calculation is not None for story in result.stories)
         written = sum(story.report is not None for story in result.stories)
         errors = sum(story.error is not None for story in result.stories)

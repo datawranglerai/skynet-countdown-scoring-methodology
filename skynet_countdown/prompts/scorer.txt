@@ -88,7 +88,7 @@ HUMAN CAPABILITY EROSION (amplifiers.human_capability_erosion)
 Covers: workforce deskilling, synthetic disinformation at scale, dependency creation
 that reduces humans' ability to detect AI errors.
 
-SENTIENCE / SELF-PRESERVATION (amplifiers.sentience_self_preservation)
+EMERGENT AGENCY SIGNALS (legacy key: amplifiers.sentience_self_preservation)
 0: No evidence of goal-directed behaviour outside training distribution
 1: Weak signals — behavioural inconsistency, possible deceptive alignment
 2: Clear evidence of models pursuing self-preservation, behaving differently under
@@ -97,7 +97,7 @@ Covers: alignment faking, sycophancy at scale, resistance to shutdown, models
 modelling their own existence as a goal. Describe observed behaviour accurately;
 this criterion does not establish consciousness or subjective experience.
 
-PHYSICAL EMBODIMENT / WEAPONISATION (amplifiers.physical_weaponisation)
+PHYSICAL WEAPONISATION (amplifiers.physical_weaponisation)
 0: Software-only, no physical world access
 1: Physical embodiment present but in controlled/civilian contexts
 2: Autonomous physical capability with harmful potential — weapons, military,

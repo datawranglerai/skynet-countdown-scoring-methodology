@@ -147,6 +147,21 @@ class ChainTests(unittest.TestCase):
                 self.assertEqual(client.responses.create.call_count, attempts)
                 self.assertEqual(len(audit), attempts)
 
+    def test_invalid_writer_metadata_is_corrected_or_fails_explicitly(self):
+        invalid = {**editorial(), "metadata_line": "Two Fragments · missing context"}
+        for corrected in (True, False):
+            with self.subTest(corrected=corrected):
+                client = fake_client(invalid, editorial() if corrected else invalid)
+                audit = []
+                if corrected:
+                    result = self.invoke(client, output_type=Editorial, audit=audit)
+                    self.assertEqual(result.metadata_line, editorial()["metadata_line"])
+                else:
+                    with self.assertRaisesRegex(ChainError, "after 2 attempt"):
+                        self.invoke(client, output_type=Editorial, audit=audit)
+                self.assertEqual(client.responses.create.call_count, 2)
+                self.assertEqual(len(audit), 2)
+
     def test_model_refusal_is_audited_and_never_repaired_into_an_assessment(self):
         response = make_response(
             {},

@@ -43,12 +43,13 @@ HUMAN CAPABILITY EROSION: Large-scale skill atrophy, attacks on shared knowledge
 through deepfakes or synthetic disinformation, or dependency that reduces people's
 ability to detect AI failures.
 
-SENTIENCE / SELF-PRESERVATION: Deceptive alignment, models behaving differently
+EMERGENT AGENCY SIGNALS (legacy dimension key: sentience): Deceptive alignment, models behaving differently
 under observation, goal-directed behaviour outside the training distribution, or
 resistance to shutdown or value modification. Behavioural evidence matters; a
-claim of consciousness alone is not evidence of sentience.
+claim of consciousness alone does not establish this criterion. These behavioural
+signals do not establish consciousness or subjective experience.
 
-PHYSICAL EMBODIMENT / WEAPONISATION: AI in physical systems, autonomous weapons,
+PHYSICAL WEAPONISATION: AI in physical systems, autonomous weapons,
 robots with harmful capabilities, or military or law-enforcement deployment.
 
 QUANTUM: Major quantum computing advances with a credible connection to capability

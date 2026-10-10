@@ -95,6 +95,23 @@ class CLITests(unittest.TestCase):
             self.assertEqual(self.run_cli("--output", str(self.output / "nested.json")), 1)
             client.assert_not_called()
 
+    def test_serialization_failure_removes_reserved_output_for_retry(self):
+        client = fake_client(
+            relevance(),
+            make_assessment((1, 1, 1)).model_dump(),
+            editorial(),
+            relevance(False, 1),
+        )
+        with (
+            patch("skynet_countdown.__main__.OpenAI") as constructor,
+            patch.object(
+                EvaluationResult, "model_dump_json", side_effect=ValueError("Cannot serialize")
+            ),
+        ):
+            constructor.return_value.__enter__.return_value = client
+            self.assertEqual(self.run_cli("--output", str(self.output)), 1)
+        self.assertFalse(self.output.exists())
+
 
 if __name__ == "__main__":
     unittest.main()
