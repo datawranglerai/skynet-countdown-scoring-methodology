@@ -199,9 +199,14 @@ class ModelContractTests(unittest.TestCase):
 
 
 class ConfigContractTests(unittest.TestCase):
-    def test_checked_in_config_matches_official_defaults(self):
+    def test_checked_in_config_uses_published_methodology(self):
         config = load_config(Path(__file__).resolve().parents[1] / "config.toml")
-        self.assertEqual(config, Config())
+        defaults = Config()
+        # Runtime model choices are independent of the published scoring methodology.
+        self.assertEqual(config.scoring, defaults.scoring)
+        self.assertEqual(config.clock, defaults.clock)
+        self.assertEqual(config.minimum_relevance_score, defaults.minimum_relevance_score)
+        self.assertEqual(config.minimum_report_score, defaults.minimum_report_score)
         self.assertEqual(config.clock.initial_seconds, 900)
         self.assertEqual(config.clock.half_scale_points, 1000)
 

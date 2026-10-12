@@ -10,6 +10,7 @@ Use Python 3.13+ and run from the repository root:
 uv sync
 uv run python -m skynet_countdown --input examples/stories.json --validate-only
 uv run python -m unittest discover -s tests -v
+uv run mkdocs build --strict
 ```
 
 Validation and tests do not require credentials or make paid API calls. Keep automated tests offline using mocked responses. If you separately test a real model, report the model and relevant settings; do not commit credentials or private source material.
@@ -23,6 +24,9 @@ Validation and tests do not require credentials or make paid API calls. Keep aut
 - `skynet_countdown/pipeline.py`: stage ordering, filtering and failure handling.
 - `skynet_countdown/config.py`, `config.toml`: validated settings and documented defaults.
 - `tests/`: offline regression coverage; `examples/`: clearly labelled fictional input.
+- `skynet_countdown/benchmark.py`: independent scorer evaluation and saved-run comparisons.
+- `examples/benchmarks/`: frozen evidence and separately stored historical reference ratings.
+- `docs/` and `mkdocs.yml`: the documentation site; preview with `uv run mkdocs serve`.
 
 ## Methodology changes
 
@@ -31,3 +35,5 @@ Validation and tests do not require credentials or make paid API calls. Keep aut
 For rubric or prompt changes, include the previous behaviour, the proposed behaviour and a concrete evidence example. For calculation or pipeline changes, add focused regression coverage, including relevant boundary and failure cases. Update the documentation and configuration example when their contract changes. Reuse existing patterns and avoid introducing an abstraction for a single caller without a clear need.
 
 A useful pull request explains the problem, resulting behaviour, verification performed and remaining limitations. Follow the repository's Lore commit convention: use an intent-led subject and appropriate git trailers such as `Tested:`, `Not-tested:` or `Constraint:`. Keep unrelated edits separate.
+
+The [development guide](docs/development.md) describes the documentation build, verification targets and change-specific checks. Keep the site self-contained and current: document implemented behaviour, identify optional extensions, and link between pages with relative Markdown paths.

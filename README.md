@@ -1,10 +1,20 @@
 # Skynet Countdown: scoring methodology
 
-An open-source Python companion to [Skynet Countdown](https://skynetcountdown.org). Bring your own collected stories, inspect the model's evidence judgements, and reproduce the published scoring calculation locally.
+An open-source Python chain pipeline for [Skynet Countdown](https://skynetcountdown.org). Bring your own collected stories, inspect the model's evidence judgements, reproduce the scoring calculation, and compare model behaviour with a local evaluation harness.
 
 This project starts after collection and scraping. It does not discover stories, scrape Reddit or articles, reconcile duplicate events, manage assessment history, allocate CVE identifiers, or publish to SQL, Sheets or Slack. It writes one local JSON result. The index is editorial: its clock is symbolic, not a forecast or a probability of catastrophe.
 
-[METHODOLOGY.md](METHODOLOGY.md) is the scoring authority: methodology v1.0, with calibration effective **7 October 2026**. The [original n8n workflow](n8n/Skynet%20Countdown%20v1.2.json) provides the relevance, criterion-assessment and editorial stages. Python derives the published totals and clock values from the component ratings; retained n8n clock recommendations never set the clock.
+[The methodology](docs/methodology.md) is the scoring authority: version 1.0, with calibration effective **7 October 2026**. Explicit Python chains handle relevance, criterion assessment and editorial writing through the OpenAI Responses SDK. Python derives all published totals and clock values from the validated ratings.
+
+## Documentation site
+
+The [documentation](docs/index.md) covers context and rationale, methodology, architecture, component responsibilities, design decisions, data contracts, configuration, evaluation and development. Preview the MkDocs Material site with the installed project environment:
+
+```sh
+uv run mkdocs serve
+```
+
+Open **http://127.0.0.1:8000**. Build the static site with `uv run mkdocs build --strict`; the output is written to `site/`. See the [development guide](docs/development.md) for validation and publishing guidance.
 
 ## Quick start
 
@@ -23,9 +33,9 @@ Copy `.env.example` to `.env` and set `OPENAI_API_KEY`. Then run:
 uv run --env-file .env python -m skynet_countdown --input examples/stories.json --output results.json
 ```
 
-Evaluation sends supplied story fields to OpenAI and incurs API charges. The default model is `gpt-5.4` with high reasoning effort; adjust `config.toml` to suit your needs and model access. Existing environment variables work too: the application itself does not load `.env`.
+Evaluation sends supplied story fields to OpenAI and incurs API charges. The supplied `config.toml` selects `gpt-5.4-mini` with medium reasoning effort for all three stages; adjust it to suit your needs and model access. Omitted model settings fall back to `gpt-5.4` with high reasoning effort in `Config()`. Existing environment variables work too: the application itself does not load `.env`.
 
-The output path must be new and its parent directory must exist. Existing files are never overwritten. Use `--config path/to/config.toml` to select another configuration. This is a small uv project run directly from its checkout, with the OpenAI SDK and Pydantic as its only runtime dependencies.
+The output path must be new and its parent directory must exist. Existing files are never overwritten. Use `--config path/to/config.toml` to select another configuration. This is a small uv project run directly from its checkout, using the OpenAI SDK for model calls and Pydantic for validation.
 
 ## Supply stories
 
@@ -51,7 +61,7 @@ The input is a UTF-8 JSON object containing a `stories` array:
 
 Supply one selected source per explicitly grouped event. The caller owns event grouping, canonical source selection and assessment history; do not pass revisions or repeated coverage as separate events. Different articles about the same event are not automatically recognised as duplicates, even with distinct IDs. A source URL is attribution, not fetched content: provide the original source evidence in `summary`, `content` and `metadata`, rather than treating Reddit titles or comments as the basis for ratings. Without article content, the model works from the remaining supplied evidence and records its limitations.
 
-This companion generates fresh assessments and reports. It does not ingest legacy n8n assessment exports or enforce their database schema. In particular, its `calculation.total_score` is the published weighted score; it must not be copied into n8n's retained unweighted `total_score` column. The distinct `calculation.raw_source_total` exposes that 0–13 sum for the editorial gate and integrations. A legacy exporter must also derive and validate the raw classification and other required source fields described in methodology section 11.
+The pipeline generates fresh assessments and reports. Its `calculation.total_score` is the published weighted score. The distinct `calculation.raw_source_total` exposes the unweighted 0–13 component sum used by the editorial gate and integrations. Keep these fields distinct when importing historical ratings or exporting results; use the [data contracts](docs/reference/data-contracts.md) as the integration reference.
 
 ## Evaluation stages
 
@@ -62,7 +72,7 @@ This companion generates fresh assessments and reports. It does not ingest legac
 
 The relevance and writer stages are structured LLM chains without tools. The scorer is also a chain by default; optional hosted web search can check the supplied story. There is no agent framework or custom tool loop. All model outputs use strict JSON schemas and are validated with Pydantic.
 
-Stories are processed by recorded date, then canonical event ID. No publication-date cutoff or automatic rebasing applies. The default relevance threshold is **2**, matching the n8n filter actually executed; its unused configuration value of 5 is not adopted. The rubric marks scores 1–2 as irrelevant, and contradictory positive flags trigger a correction attempt. The default report threshold is **2 raw source points**, matching the saved writer branch. Every successfully assessed story contributes its published points even when below that reporting threshold or when report writing is disabled. Zero-score assessments remain in the output and do not move the clock.
+Stories are processed by recorded date, then canonical event ID. No publication-date cutoff or automatic rebasing applies. The default relevance threshold is **2**. The rubric marks scores 1–2 as irrelevant, and contradictory positive flags trigger a correction attempt, so a valid positive decision needs a score of at least 3. The default report threshold is **2 raw source points**. Every successfully assessed story contributes its published points even when below that reporting threshold or when report writing is disabled. Zero-score assessments remain in the output and do not move the clock.
 
 ## Deterministic scoring
 
@@ -95,7 +105,7 @@ gap_closed_percent = 100 × (1 - 2^(-s / H))
 evidence_pressure_percent = 100 × (1 - 2^(-B / H))
 ```
 
-Defaults are **`T = 900` seconds (15:00)** and **`H = 1000`**: every 1,000 points halve the remaining time. The initial display reference is borrowed once from IMD's September 2026 AI Safety Clock reading, as explained in methodology section 7; it does not add points or create a date cutoff. Movement is calculated as `remaining_seconds(B) × gap_closed_percent / 100` using `expm1`, preserving tiny changes instead of subtracting nearly equal numbers. Evidence pressure measures the share of the initial symbolic window consumed, not the percentage of human control lost.
+Defaults are **`T = 900` seconds (15:00)** and **`H = 1000`**: every 1,000 points halve the remaining time. The initial display reference is borrowed once from IMD's September 2026 AI Safety Clock reading, as explained in the [methodology](docs/methodology.md); it does not add points or create a date cutoff. Movement is calculated as `remaining_seconds(B) × gap_closed_percent / 100` using `expm1`, preserving tiny changes instead of subtracting nearly equal numbers. Evidence pressure measures the share of the initial symbolic window consumed, not the percentage of human control lost.
 
 `clock.initial_evidence_points` starts a run from an existing cumulative total. Supplying that total does not provide history or prevent recounting earlier events. For corrections, rerun the complete caller-selected ledger from zero; a corrected score or grouping can move the recalculated clock in either direction. Scores never subtract evidence, grant recovery credit or decay over time.
 
@@ -105,9 +115,19 @@ The official 113-point example displays **13:52**. With 191 prior points, a full
 
 The arithmetic is deterministic for the same validated ratings, configuration and event order. Model judgements and editorial text can vary between runs. The pure functions in [`scoring.py`](skynet_countdown/scoring.py), including `calculate_score`, `remaining_seconds`, `gap_closed_percent` and `evidence_pressure_percent`, can be used independently of the API; [`pipeline.py`](skynet_countdown/pipeline.py) exposes `evaluate(dataset, config, client=...)` for integrations. Criterion contracts live in [`models.py`](skynet_countdown/models.py), rubric instructions in [`prompts/`](skynet_countdown/prompts/), and published defaults in [`config.py`](skynet_countdown/config.py) and [`config.toml`](config.toml).
 
+## Model benchmarks
+
+For model comparisons, the [benchmark guide](docs/benchmarking.md) describes a memory-free scorer harness and 40 source-grounded cases imported from historical PostgreSQL exports. References remain unreviewed model outputs. Validate the dataset without API calls:
+
+```sh
+uv run python -m skynet_countdown.benchmark --dataset examples/benchmarks/benchmark.json --validate-only
+```
+
+The guide covers repeated runs, saved model baselines, evidence limitations and an optional future memory integration.
+
 ## Configuration
 
-[`config.toml`](config.toml) contains all defaults and is read with Python's standard TOML parser. Unknown keys and invalid values fail validation.
+[`config.toml`](config.toml) contains the supplied runtime settings and is read with Python's standard TOML parser. Omitted values use the defaults in `config.py`; the [configuration reference](docs/reference/configuration.md) distinguishes those defaults from the supplied overrides. Unknown keys and invalid values fail validation.
 
 | Settings | Meaning |
 | --- | --- |

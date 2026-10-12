@@ -1,0 +1,102 @@
+site_name: Skynet Countdown
+site_description: Evidence-led AI scoring, an inspectable Python pipeline, and reproducible model evaluation.
+repo_url: https://github.com/datawranglerai/skynet-countdown-scoring-methodology
+repo_name: Source code
+docs_dir: docs
+site_dir: site
+strict: true
+
+theme:
+  name: material
+  custom_dir: docs_theme
+  language: en
+  font: false
+  favicon: assets/favicon.svg
+  icon:
+    logo: material/timer-outline
+    repo: fontawesome/brands/github
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+nav:
+  - Overview:
+      - Start here: index.md
+      - Context and rationale: context.md
+  - Use the pipeline:
+      - Quick start: getting-started.md
+      - Configuration: reference/configuration.md
+      - Data contracts: reference/data-contracts.md
+      - Troubleshooting: troubleshooting.md
+  - Methodology: methodology.md
+  - Architecture:
+      - System design: architecture.md
+      - Components: components.md
+      - Design decisions: decisions.md
+      - Python API: reference/python-api.md
+  - Evaluation:
+      - Benchmark harness: benchmarking.md
+      - Extensions and memory: extensions.md
+  - Development: development.md
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+    absolute_links: warn
+  links:
+    not_found: warn
+    anchors: warn
+    unrecognized_links: warn
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  generator: false
+
+copyright: Skynet Countdown · Methodology 1.0 · MIT-licensed project

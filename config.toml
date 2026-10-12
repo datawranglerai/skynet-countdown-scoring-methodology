@@ -7,24 +7,24 @@ request_timeout_seconds = 180.0
 api_max_retries = 2
 
 [relevance]
-model = "gpt-5.4"
-reasoning_effort = "high"
+model = "gpt-5.4-mini"
+reasoning_effort = "medium"
 max_iterations = 2
 max_output_tokens = 8192
 
 [scorer]
-model = "gpt-5.4"
-reasoning_effort = "high"
+model = "gpt-5.4-mini"
+reasoning_effort = "medium"
 max_iterations = 2
 max_output_tokens = 8192
 # Only the scorer may search; the default run uses supplied evidence exclusively.
 web_search = false
 web_search_context_size = "medium"
-max_tool_calls = 5
+max_tool_calls = 3
 
 [writer]
-model = "gpt-5.4"
-reasoning_effort = "high"
+model = "gpt-5.4-mini"
+reasoning_effort = "medium"
 max_iterations = 2
 max_output_tokens = 8192
 
