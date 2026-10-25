@@ -2,9 +2,9 @@
 
 An open-source Python companion to [Skynet Countdown](https://skynetcountdown.org). Bring your own collected stories, inspect the model's evidence judgements, and reproduce the published scoring calculation locally.
 
-This project starts after collection and scraping. It does not discover stories, scrape Reddit or articles, reconcile duplicate events, manage assessment history, allocate CVE identifiers, or publish to SQL, Sheets or Slack. It writes one local JSON result. The index is editorial: its clock is symbolic, not a forecast or a probability of catastrophe.
+This project starts after collection and scraping. It does not discover stories, scrape articles, reconcile duplicate events, manage assessment history, allocate CVE identifiers, or publish data to external sources. It writes one local JSON result. The index is editorial: its clock is symbolic, not a forecast or a probability of catastrophe.
 
-[METHODOLOGY.md](METHODOLOGY.md) is the scoring authority: methodology v1.0, with calibration effective **7 October 2026**. The [original n8n workflow](n8n/Skynet%20Countdown%20v1.2.json) provides the relevance, criterion-assessment and editorial stages. Python derives the published totals and clock values from the component ratings; retained n8n clock recommendations never set the clock.
+[METHODOLOGY.md](METHODOLOGY.md) is the scoring authority: methodology v1.0, with calibration effective **7 October 2026**. Python derives the published totals and clock values from the component ratings.
 
 ## Quick start
 
@@ -51,7 +51,7 @@ The input is a UTF-8 JSON object containing a `stories` array:
 
 Supply one selected source per explicitly grouped event. The caller owns event grouping, canonical source selection and assessment history; do not pass revisions or repeated coverage as separate events. Different articles about the same event are not automatically recognised as duplicates, even with distinct IDs. A source URL is attribution, not fetched content: provide the original source evidence in `summary`, `content` and `metadata`, rather than treating Reddit titles or comments as the basis for ratings. Without article content, the model works from the remaining supplied evidence and records its limitations.
 
-This companion generates fresh assessments and reports. It does not ingest legacy n8n assessment exports or enforce their database schema. In particular, its `calculation.total_score` is the published weighted score; it must not be copied into n8n's retained unweighted `total_score` column. The distinct `calculation.raw_source_total` exposes that 0–13 sum for the editorial gate and integrations. A legacy exporter must also derive and validate the raw classification and other required source fields described in methodology section 11.
+This companion generates fresh assessments and reports. It does not ingest legacy assessment exports or enforce their database schema. In particular, its `calculation.total_score` is the published weighted score. The distinct `calculation.raw_source_total` exposes that 0–13 sum for the editorial gate and integrations. A legacy exporter must also derive and validate the raw classification and other required source fields described in methodology section 11.
 
 ## Evaluation stages
 
@@ -62,7 +62,7 @@ This companion generates fresh assessments and reports. It does not ingest legac
 
 The relevance and writer stages are structured LLM chains without tools. The scorer is also a chain by default; optional hosted web search can check the supplied story. There is no agent framework or custom tool loop. All model outputs use strict JSON schemas and are validated with Pydantic.
 
-Stories are processed by recorded date, then canonical event ID. No publication-date cutoff or automatic rebasing applies. The default relevance threshold is **2**, matching the n8n filter actually executed; its unused configuration value of 5 is not adopted. The rubric marks scores 1–2 as irrelevant, and contradictory positive flags trigger a correction attempt. The default report threshold is **2 raw source points**, matching the saved writer branch. Every successfully assessed story contributes its published points even when below that reporting threshold or when report writing is disabled. Zero-score assessments remain in the output and do not move the clock.
+Stories are processed by recorded date, then canonical event ID. No publication-date cutoff or automatic rebasing applies. The default relevance threshold is **2**, matching the site filter actually executed; its unused configuration value of 5 is not adopted. The rubric marks scores 1–2 as irrelevant, and contradictory positive flags trigger a correction attempt. The default report threshold is **2 raw source points**, matching the saved writer branch. Every successfully assessed story contributes its published points even when below that reporting threshold or when report writing is disabled. Zero-score assessments remain in the output and do not move the clock.
 
 ## Deterministic scoring
 
