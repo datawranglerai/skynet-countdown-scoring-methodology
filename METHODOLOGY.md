@@ -4,7 +4,7 @@
 
 This document explains how a source becomes an assessment, how an assessment becomes a score, and how scores move the clock. It also records the assumptions and implementation boundaries that a future maintainer needs to evaluate or improve the method.
 
-[README.md](README.md) introduces the project. [APP.md](APP.md) covers operation and deployment. [DESIGN.md](DESIGN.md) governs presentation. The Methodology page presents the reader-facing explanation and calculator. This document is the full methodological reference; the linked code and saved workflow prompts make its implementation inspectable.
+The site's methodology page presents the reader-facing explanation and calculator. This document is the full methodological reference.
 
 ## Contents
 
