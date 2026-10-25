@@ -1,5 +1,7 @@
 # Skynet Countdown: scoring methodology
 
+[![PyPI version](https://img.shields.io/pypi/v/skynet-countdown-scoring-methodology.svg)](https://pypi.org/project/skynet-countdown-scoring-methodology/)
+
 This open-source Python companion to [Skynet Countdown](https://skynetcountdown.org) reproduces the published scoring calculation locally from stories you've already collected. You can inspect the model's evidence judgements.
 
 This project starts after collection and scraping. It does not discover stories, scrape articles, reconcile duplicate events, manage assessment history, allocate CVE identifiers, or publish data to external sources. It writes one local JSON result.
