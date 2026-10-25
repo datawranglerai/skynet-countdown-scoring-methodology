@@ -23,6 +23,32 @@ def run_chain[Output: BaseModel](
     settings: ChainConfig,
     audit: list[AgentRun],
 ) -> Output:
+    """Request structured output and retry responses that fail schema validation.
+
+    Each received response is appended to ``audit`` before its content is checked.
+    Only schema-validation failures trigger correction requests, up to
+    ``settings.max_iterations`` total attempts. Hosted search is enabled only
+    when requested by a ``ScorerConfig``; transport retries belong to the client.
+
+    :param client: OpenAI client used to send Responses API requests.
+    :type client: openai.OpenAI
+    :param instructions: Stage instructions, extended with the applicable evidence rule.
+    :type instructions: str
+    :param payload: JSON-serializable evidence supplied as the user message.
+    :type payload: dict[str, typing.Any]
+    :param output_type: Pydantic model defining the requested JSON schema and validation.
+    :type output_type: type[Output]
+    :param settings: Model, reasoning, token and attempt limits, plus optional search settings.
+    :type settings: ChainConfig
+    :param audit: Caller-owned list extended in place with each received response's metadata.
+    :type audit: list[AgentRun]
+    :return: The first response that satisfies the output model's validation rules.
+    :rtype: Output
+    :raises ChainError: If the model refuses, a response or search is incomplete,
+        or structured output remains invalid after all permitted attempts.
+    :raises openai.OpenAIError: If an API request fails after the client's retries.
+    :raises TypeError: If the payload contains values that cannot be serialized to JSON.
+    """
     search_enabled = isinstance(settings, ScorerConfig) and settings.web_search
     source_rule = (
         "Web search is available for checking this supplied story. Distinguish retrieved "
