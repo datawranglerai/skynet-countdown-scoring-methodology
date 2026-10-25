@@ -1,13 +1,33 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "skynet-countdown-scoring-methodology"
-version = "0.1.0"
+version = "1.0"
 description = "Reproduce the Skynet Countdown evaluation methodology on supplied AI news stories"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.13"
 dependencies = [
     "openai>=3.24.0",
     "pydantic>=2.13.5",
 ]
+
+[project.urls]
+Homepage = "https://skynetcountdown.org"
+Repository = "https://github.com/datawranglerai/skynet-countdown-scoring-methodology"
+Issues = "https://github.com/datawranglerai/skynet-countdown-scoring-methodology/issues"
+
+[project.scripts]
+skynet-countdown = "skynet_countdown.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["skynet_countdown*"]
+
+[tool.setuptools.package-data]
+skynet_countdown = ["prompts/*.txt"]
 
 [tool.ruff]
 target-version = "py313"

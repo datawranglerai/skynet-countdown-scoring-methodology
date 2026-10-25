@@ -29,7 +29,20 @@ Evaluation sends supplied story fields to OpenAI and incurs API charges. The def
 
 The output path must be new and its parent directory must exist. Existing files are never overwritten. Use `--config path/to/config.toml` to select another configuration.
 
-Run the project directly from its checkout with uv. Its only runtime dependencies are the OpenAI SDK and Pydantic.
+Its only runtime dependencies are the OpenAI SDK and Pydantic.
+
+### Install from PyPI
+
+Once the first release is published, you can install it in a Python 3.13+ virtual environment:
+
+```sh
+python -m pip install skynet-countdown-scoring-methodology
+skynet-countdown --input stories.json --config config.toml --validate-only
+```
+
+Supply your own `stories.json` and `config.toml`. Copy the repository's [`config.toml`](https://github.com/datawranglerai/skynet-countdown-scoring-methodology/blob/main/config.toml), or create an empty TOML file to use the defaults. Set `OPENAI_API_KEY` and replace `--validate-only` with `--output results.json` to evaluate stories. You can also run the installed package with `python -m skynet_countdown`.
+
+Maintainers can find release setup and versioning instructions in [CONTRIBUTING.md](CONTRIBUTING.md#publishing-releases).
 
 ## Supply stories
 
