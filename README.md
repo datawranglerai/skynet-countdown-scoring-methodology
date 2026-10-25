@@ -59,7 +59,7 @@ Supply one selected source per explicitly grouped event. You are responsible for
 
 A source URL provides attribution; the application does not fetch it. Supply the original source evidence in `summary`, `content` and `metadata`. Do not base ratings on Reddit titles or comments. Without article content, the model works from the remaining supplied evidence and records its limitations.
 
-This companion generates fresh assessments and reports. It does not ingest legacy assessment exports or enforce their database schema. Its `calculation.total_score` is the published weighted score. `calculation.raw_source_total` exposes the separate 0–13 sum for the editorial gate and integrations. A legacy exporter must also derive and validate the raw classification and other required source fields described in methodology section 11.
+This companion generates fresh assessments and reports. It does not ingest legacy assessment exports or enforce their database schema. Its `calculation.total_score` is the published weighted score. `calculation.raw_source_total` exposes the separate 0–13 sum for the editorial gate and integrations. See [Published score and severity](METHODOLOGY.md#6-published-score-and-severity) for the distinction.
 
 ## Evaluation stages
 
