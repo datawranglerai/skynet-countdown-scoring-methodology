@@ -317,9 +317,7 @@ review: its autonomy rating adds two points immediately, even though the classif
 CRITICAL. This is why the Trifecta contribution is calculated before adding amplifiers.
 
 E demonstrates why raw workflow classifications must not supply published severity. Its raw total is
-9, while the weighted published score is 13. See the
-[CSV migration baseline](references/SKYNET_COUNTDOWN_SITE_README.md#csv-migration-baseline) for the
-source-format contract.
+9, while the weighted published score is 13.
 
 ### Scores to movement
 
