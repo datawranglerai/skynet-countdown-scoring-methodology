@@ -13,6 +13,20 @@ from .scoring import remaining_seconds
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Validate supplied inputs or evaluate stories and save a new JSON result file.
+
+    Validation mode makes no API calls. Evaluation reserves the output path before
+    making requests and removes that file if evaluation or serialization raises.
+    Status messages go to standard output; caught errors go to standard error.
+
+    :param argv: Command-line arguments excluding the program name, or ``None``
+        to use ``sys.argv[1:]``.
+    :type argv: list[str] or None
+    :return: Zero for successful validation or a complete evaluation; one for
+        caught input, file or API errors, or an evaluation with failed stages.
+    :rtype: int
+    :raises SystemExit: With status zero for help or two for invalid command-line arguments.
+    """
     parser = argparse.ArgumentParser(description="Evaluate supplied Skynet Countdown stories.")
     parser.add_argument(
         "--input", type=Path, required=True, help="JSON object containing a stories array"

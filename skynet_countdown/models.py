@@ -33,6 +33,12 @@ class Dataset(StrictModel):
 
     @model_validator(mode="after")
     def unique_ids(self) -> Self:
+        """Validate that every story has a distinct identifier.
+
+        :return: The validated dataset.
+        :rtype: Self
+        :raises ValueError: If two or more stories have the same identifier.
+        """
         ids = [story.id for story in self.stories]
         if len(ids) != len(set(ids)):
             raise ValueError("Story IDs must be unique; supply each event once.")
@@ -56,6 +62,12 @@ class Relevance(StrictModel):
 
     @model_validator(mode="after")
     def low_scores_are_irrelevant(self) -> Self:
+        """Require low relevance scores to be marked irrelevant.
+
+        :return: The validated relevance assessment.
+        :rtype: Self
+        :raises ValueError: If a score of one or two is marked relevant.
+        """
         if self.relevant_to_skynet and self.relevance_score <= 2:
             raise ValueError("Relevance scores 1–2 must be marked irrelevant under the rubric.")
         return self
@@ -96,6 +108,12 @@ class Assessment(StrictModel):
 
     @model_validator(mode="after")
     def leading_indicator_has_explanation(self) -> Self:
+        """Keep the leading-indicator flag and explanatory note consistent.
+
+        :return: The validated assessment.
+        :rtype: Self
+        :raises ValueError: If the flag and presence of a note do not agree.
+        """
         if self.is_leading_indicator != bool(self.leading_indicator_note):
             raise ValueError("Provide a leading_indicator_note exactly when the flag is true.")
         return self
@@ -111,12 +129,25 @@ class Editorial(StrictModel):
 
     @model_validator(mode="after")
     def headline_length(self) -> Self:
+        """Limit the headline to twelve words.
+
+        :return: The validated editorial content.
+        :rtype: Self
+        :raises ValueError: If the headline contains more than twelve words.
+        """
         if len(self.headline.split()) > 12:
             raise ValueError("The headline must contain at most 12 words.")
         return self
 
     @model_validator(mode="after")
     def metadata_fragments(self) -> Self:
+        """Require one lowercase metadata line with three fragments separated by ``' · '``.
+
+        :return: The validated editorial content.
+        :rtype: Self
+        :raises ValueError: If there are not exactly three nonempty fragments, the
+            text is not lowercase, or the line contains a newline or carriage return.
+        """
         fragments = self.metadata_line.split(" · ")
         if (
             len(fragments) != 3

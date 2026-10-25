@@ -24,6 +24,21 @@ def evaluate(dataset: Dataset, config: Config, *, client: OpenAI) -> EvaluationR
     The caller owns the client and its transport retry/timeout settings. The CLI
     constructs it from config. IDs are canonical event slugs; date then ID defines
     per-incident movement. The caller supplies one selected source per event.
+
+    Stage failures are stored on each story so later stories can still run.
+    A writer failure preserves the completed assessment and its accumulated points.
+
+    :param dataset: Supplied stories with unique event IDs; revalidated before evaluation.
+    :type dataset: Dataset
+    :param config: Stage settings, filtering thresholds and scoring and clock parameters.
+    :type config: Config
+    :param client: Caller-managed OpenAI client used for all model requests.
+    :type client: openai.OpenAI
+    :return: Results in date-then-ID order, including excluded stories, partial results,
+        errors, request audits, prompt hashes and final cumulative clock values.
+    :rtype: EvaluationResult
+    :raises pydantic.ValidationError: If the dataset or configuration fails revalidation.
+    :raises OSError: If a packaged prompt cannot be read.
     """
     dataset = Dataset.model_validate(dataset.model_dump())
     config = Config.model_validate(config.model_dump())

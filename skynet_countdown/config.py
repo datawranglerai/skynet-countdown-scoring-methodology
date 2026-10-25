@@ -37,6 +37,12 @@ class SeverityThresholds(StrictModel):
 
     @model_validator(mode="after")
     def increasing_thresholds(self) -> Self:
+        """Require severity thresholds to start at one and strictly increase.
+
+        :return: The validated severity thresholds.
+        :rtype: Self
+        :raises ValueError: If the thresholds do not follow the required ordering.
+        """
         thresholds = list(self.model_dump().values())
         if thresholds[0] != 1 or any(a >= b for a, b in pairwise(thresholds)):
             raise ValueError("Severity thresholds must start at 1 and strictly increase.")
@@ -51,6 +57,12 @@ class ScoringConfig(StrictModel):
 
     @model_validator(mode="after")
     def increasing_trifecta_points(self) -> Self:
+        """Require Trifecta points to start at zero and never decrease.
+
+        :return: The validated scoring configuration.
+        :rtype: Self
+        :raises ValueError: If the point sequence does not follow the required ordering.
+        """
         points = self.trifecta_points
         if points[0] != 0 or any(a > b for a, b in pairwise(points)):
             raise ValueError("Trifecta points must start at zero and never decrease.")
@@ -77,5 +89,15 @@ class Config(StrictModel):
 
 
 def load_config(path: str | Path) -> Config:
+    """Load and validate configuration from a TOML file.
+
+    :param path: Path to the TOML configuration file.
+    :type path: str | pathlib.Path
+    :return: The validated application configuration.
+    :rtype: Config
+    :raises OSError: If the configuration file cannot be opened or read.
+    :raises tomllib.TOMLDecodeError: If the file does not contain valid TOML.
+    :raises pydantic.ValidationError: If the parsed settings violate the configuration schema.
+    """
     with Path(path).open("rb") as handle:
         return Config.model_validate(tomllib.load(handle))
