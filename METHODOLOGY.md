@@ -426,11 +426,8 @@ but a larger number of seconds.
    updating the prompt alone does not rescore existing stored assessments; choose and document a
    review/rescoring process. A pure calibration change can recompute time from the existing selected
    scores.
-7. Keep this document, README, APP, DESIGN and the public Methodology page consistent. Preserve
+7. Keep this document, README, and the public Methodology page consistent. Preserve
    source attribution and distinguish the borrowed IMD starting reading from our own calculation.
-8. Run the relevant checks and inspect the public explanation and calculator. Deploy shared
-   calculation changes to both the Railway API and GitHub Pages frontend; neither should describe a
-   different calibration from the other.
 
 Consider fixing the saved workflow's inconsistent relevance threshold and clarifying its
 raw-versus-published scoring instructions. Changes to weights, recovery or confidence need explicit
